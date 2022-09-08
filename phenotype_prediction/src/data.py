@@ -1,4 +1,3 @@
-from genericpath import isfile
 import gzip
 import os.path
 import re
@@ -77,7 +76,7 @@ def generate_sketches() -> None:
 
         print(
             f"Interleaving and histosketching {gid} samples...")
-        cmd = ["hulk", "sketch", "-o", f"sketches/{gid}"]
+        cmd = f"hulk sketch -o sketches/{gid}".split()
         process = subprocess.Popen(
             cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         process.stdin.write(
@@ -113,19 +112,20 @@ def generate_sketches_seqfu():
                 continue
 
             if not os.path.isfile(f"{file_name}.gz"):
-                request.urlretrieve(f"{gid_link}_pe_{i}.fastq.gz", f"{file_name}.gz")
+                request.urlretrieve(
+                    f"{gid_link}_pe_{i}.fastq.gz", f"{file_name}.gz")
 
             with gzip.open(f"{file_name}.gz", "rb") as compressed:
                 with open(file_name, "wb") as uncompressed:
-                    shutil.copyfileobj(compressed, uncompressed)
-            
+                    shutil.copyfileobj(
+                        compressed, uncompressed)
+
             os.remove(f"{file_name}.gz")
 
         print(
             f"Interleaving and histosketching {gid} samples...")
         cmd = f"seqfu ilv -1 data/{gid}_pe_1.fastq data/{gid}_pe_2.fastq | hulk sketch -o sketches/{gid}".split()
-        process = subprocess.Popen(
-            cmd, shell=True)
+        process = subprocess.Popen(cmd, shell=True)
         process.wait()
 
         for i in range(1, 3):
