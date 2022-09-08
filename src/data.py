@@ -1,4 +1,6 @@
+from genericpath import isfile
 import gzip
+import os.path
 import re
 import sys
 import subprocess
@@ -30,7 +32,7 @@ def get_links_to_data_set_gids() -> list[str]:
 
 def interleave_fastq(f1, f2) -> bytearray:
     """
-        Interleaves two paired-end fastq files (based on interleave-fastq by Erik Garrison and Sébastien Boisvert).
+        Interleave two paired-end fastq files (based on interleave-fastq by Erik Garrison and Sébastien Boisvert).
     """
     buff = bytearray()
 
@@ -55,19 +57,39 @@ def generate_sketches() -> None:
     """
         Generate sketches of available whole genome shotgun sequencing data.
     """
+    print(f"Fetching paired-end fastq files...")
     gid_links = get_links_to_data_set_gids()
 
     for gid_link in gid_links:
         gid = gid_link.split("/")[-1]
-        pes = [gzip.GzipFile(fileobj=request.urlopen(
-            f"{gid_link}_pe_{i}.fastq.gz").read()) for i in range(1, 3)]
 
-        # Histosketch the interleaved fastq file
+        if os.path.isfile(f"sketches/sample_{gid}.json"):
+            print(
+                f"Found existing sketch; skipping sample {gid}.")
+            continue
+
+        print(
+            f"Downloading {gid} paired-end fastq files...")
+        pes = [gzip.GzipFile(fileobj=request.urlopen(
+            f"{gid_link}_pe_{i}.fastq.gz")) for i in range(1, 3)]
+
+        print(
+            f"Interleaving and histosketching {gid} samples...")
         cmd = ["hulk", "sketch", "-o", f"sketches/{gid}"]
         process = subprocess.Popen(
             cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         process.stdin.write(
             interleave_fastq(pes[0], pes[1]))
         process.communicate()[0]
+
         process.wait()
         process.stdin.close()
+        print(f"Completed {gid} sample histosketching.")
+
+
+def main():
+    generate_sketches()
+
+
+if __name__ == "__main__":
+    main()
