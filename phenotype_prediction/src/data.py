@@ -2,6 +2,7 @@ from genericpath import isfile
 import gzip
 import os.path
 import re
+import shutil
 import sys
 import subprocess
 from urllib import request
@@ -56,6 +57,7 @@ def interleave_fastq(f1, f2) -> bytearray:
 def generate_sketches() -> None:
     """
         Generate sketches of available whole genome shotgun sequencing data.
+        Note: manual interleaving is too slow.
     """
     print(f"Fetching paired-end fastq files...")
     gid_links = get_links_to_data_set_gids()
@@ -87,8 +89,52 @@ def generate_sketches() -> None:
         print(f"Completed {gid} sample histosketching.")
 
 
+def generate_sketches_seqfu():
+    """
+        Generate sketches of available whole genome shotgun sequencing data.
+        Note: uses seqfu for faster interleaving but very memory intensive to unzip files.
+    """
+    print(f"Fetching paired-end fastq files...")
+    gid_links = get_links_to_data_set_gids()
+
+    for gid_link in gid_links:
+        gid = gid_link.split("/")[-1]
+
+        if os.path.isfile(f"sketches/sample_{gid}.json"):
+            print(
+                f"Found existing sketch; skipping sample {gid}.")
+            continue
+
+        print(
+            f"Downloading {gid} paired-end fastq files...")
+        for i in range(1, 3):
+            file_name = f"data/{gid}_pe_{i}.fastq"
+            if os.path.isfile(file_name):
+                continue
+
+            if not os.path.isfile(f"{file_name}.gz"):
+                request.urlretrieve(f"{gid_link}_pe_{i}.fastq.gz", f"{file_name}.gz")
+
+            with gzip.open(f"{file_name}.gz", "rb") as compressed:
+                with open(file_name, "wb") as uncompressed:
+                    shutil.copyfileobj(compressed, uncompressed)
+            
+            os.remove(f"{file_name}.gz")
+
+        print(
+            f"Interleaving and histosketching {gid} samples...")
+        cmd = f"seqfu ilv -1 data/{gid}_pe_1.fastq data/{gid}_pe_2.fastq | hulk sketch -o sketches/{gid}".split()
+        process = subprocess.Popen(
+            cmd, shell=True)
+        process.wait()
+
+        for i in range(1, 3):
+            os.remove(f"data/{gid}_pe_{i}.fastq")
+        print(f"Completed {gid} sample histosketching.")
+
+
 def main():
-    generate_sketches()
+    generate_sketches_seqfu()
 
 
 if __name__ == "__main__":
