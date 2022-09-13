@@ -23,7 +23,7 @@ function clean_fastq {
 function process_gz {
   FASTQ_GZ_NAME=$(basename $1)
   FILE_PATH=$PATH_TO_CLEAN_DATA/${FASTQ_GZ_NAME%.gz}
-  gunzip $1 | clean_fastq >$FILE_PATH
+  gunzip -c $1 | clean_fastq >$FILE_PATH
   echo $FILE_PATH
 }
 
@@ -35,5 +35,5 @@ FASTQ_INTERLEAVED="$PATH_TO_CLEAN_DATA/$GID.fastq"
 seqfu ilv -1 $FASTQ_PE_1_CLEAN -2 $FASTQ_PE_2_CLEAN >$FASTQ_INTERLEAVED
 rm $FASTQ_PE_1_CLEAN $FASTQ_PE_2_CLEAN
 
-cat $FASTQ_INTERLEAVED | hulk sketch -o "$PATH_TO_SKETCHES/sample_$GID"
+hulk <$FASTQ_INTERLEAVED sketch -o "$PATH_TO_SKETCHES/sample_$GID"
 rm $FASTQ_INTERLEAVED
