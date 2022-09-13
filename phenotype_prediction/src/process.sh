@@ -17,14 +17,13 @@ function clean_fastq {
     {header = $0 ; getline seq ; getline qheader ; getline qseq ;
       if (length(seq) >= min_seq_len && seq !~ /^[ATCG]*$/)
         {print header, seq, qheader, qseq}
-    }' <$1
+    }'
 }
 
 function process_gz {
   FASTQ_GZ_NAME=$(basename $1)
   FILE_PATH=$PATH_TO_CLEAN_DATA/${FASTQ_GZ_NAME%.gz}
-  clean_fastq <(gunzip $1) >$FILE_PATH
-  rm $1
+  gunzip $1 | clean_fastq >$FILE_PATH
   echo $FILE_PATH
 }
 
