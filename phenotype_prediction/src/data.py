@@ -114,22 +114,13 @@ def generate_sketches_seqfu():
             if not os.path.isfile(f"{file_name}.gz"):
                 request.urlretrieve(
                     f"{gid_link}_pe_{i}.fastq.gz", f"{file_name}.gz")
-
-            with gzip.open(f"{file_name}.gz", "rb") as compressed:
-                with open(file_name, "wb") as uncompressed:
-                    shutil.copyfileobj(
-                        compressed, uncompressed)
-
-            os.remove(f"{file_name}.gz")
-
+                    
         print(
             f"Interleaving and histosketching {gid} samples...")
-        cmd = f"seqfu ilv -1 data/{gid}_pe_1.fastq data/{gid}_pe_2.fastq | hulk sketch -o sketches/{gid}".split()
+        cmd = f"bash process.sh data/{gid}_pe_1.fastq.gz data/{gid}_pe_2.fastq.gz".split()
         process = subprocess.Popen(cmd, shell=True)
         process.wait()
 
-        for i in range(1, 3):
-            os.remove(f"data/{gid}_pe_{i}.fastq")
         print(f"Completed {gid} sample histosketching.")
 
 
