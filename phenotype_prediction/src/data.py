@@ -117,8 +117,8 @@ def generate_sketches_seqfu():
                     
         print(
             f"Interleaving and histosketching {gid} samples...")
-        cmd = f"bash process.sh data/{gid}_pe_1.fastq.gz data/{gid}_pe_2.fastq.gz".split()
-        process = subprocess.Popen(cmd, shell=True)
+        cmd = f"bash src/process.sh data/{gid}_pe_1.fastq.gz data/{gid}_pe_2.fastq.gz".split()
+        process = subprocess.Popen(cmd)
         process.wait()
 
         print(f"Completed {gid} sample histosketching.")
