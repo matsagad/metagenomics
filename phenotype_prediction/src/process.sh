@@ -26,13 +26,13 @@ function unzip_gz {
   echo ${FASTQ_GZ_NAME%.gz}
 }
 
-FASTQ_PE_1=$(process_gz $FASTQ_PE_1_GZ)
-FASTQ_PE_2=$(process_gz $FASTQ_PE_2_GZ)
+FASTQ_PE_1=$(unzip_gz $FASTQ_PE_1_GZ)
+FASTQ_PE_2=$(unzip_gz $FASTQ_PE_2_GZ)
 
 FASTQ_CLEAN_INTERLEAVED="$PATH_TO_CLEAN_DATA/$GID.fastq"
 
-seqfu ilv -1 $FASTQ_PE_1 -2 $FASTQ_PE_2 | clean_fastq >$FASTQ_CLEAN_INTERLEAVED
-rm $FASTQ_PE_1 $FASTQ_PE_2
+seqfu ilv -1 $FASTQ_PE_1 -2 $FASTQ_PE_2 | clean_fastq >$FASTQ_CLEAN_INTERLEAVED &&
+  rm $FASTQ_PE_1 $FASTQ_PE_2
 
-hulk <$FASTQ_CLEAN_INTERLEAVED sketch -o "$PATH_TO_SKETCHES/sample_$GID"
-rm $FASTQ_CLEAN_INTERLEAVED
+cat $FASTQ_CLEAN_INTERLEAVED | hulk sketch -o "$PATH_TO_SKETCHES/sample_$GID" &&
+  rm $FASTQ_CLEAN_INTERLEAVED
