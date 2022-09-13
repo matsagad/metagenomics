@@ -20,20 +20,19 @@ function clean_fastq {
     }'
 }
 
-function process_gz {
-  FASTQ_GZ_NAME=$(basename $1)
-  FILE_PATH=$PATH_TO_CLEAN_DATA/${FASTQ_GZ_NAME%.gz}
-  gunzip -c $1 | clean_fastq >$FILE_PATH
-  echo $FILE_PATH
+function unzip_gz {
+  FASTQ_GZ_NAME=$1
+  gunzip $1
+  echo ${FASTQ_GZ_NAME%.gz}
 }
 
-FASTQ_PE_1_CLEAN=$(process_gz $FASTQ_PE_1_GZ)
-FASTQ_PE_2_CLEAN=$(process_gz $FASTQ_PE_2_GZ)
+FASTQ_PE_1=$(process_gz $FASTQ_PE_1_GZ)
+FASTQ_PE_2=$(process_gz $FASTQ_PE_2_GZ)
 
-FASTQ_INTERLEAVED="$PATH_TO_CLEAN_DATA/$GID.fastq"
+FASTQ_CLEAN_INTERLEAVED="$PATH_TO_CLEAN_DATA/$GID.fastq"
 
-seqfu ilv -1 $FASTQ_PE_1_CLEAN -2 $FASTQ_PE_2_CLEAN >$FASTQ_INTERLEAVED
-rm $FASTQ_PE_1_CLEAN $FASTQ_PE_2_CLEAN
+seqfu ilv -1 $FASTQ_PE_1 -2 $FASTQ_PE_2 | clean_fastq >$FASTQ_CLEAN_INTERLEAVED
+rm $FASTQ_PE_1 $FASTQ_PE_2
 
-hulk <$FASTQ_INTERLEAVED sketch -o "$PATH_TO_SKETCHES/sample_$GID"
-rm $FASTQ_INTERLEAVED
+hulk <$FASTQ_CLEAN_INTERLEAVED sketch -o "$PATH_TO_SKETCHES/sample_$GID"
+rm $FASTQ_CLEAN_INTERLEAVED
