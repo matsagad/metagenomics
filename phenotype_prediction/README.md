@@ -1,4 +1,4 @@
-# Type I Diabetes Prediction from Whole Shotgun Metagenome of Human Infant Gut
+# Type I Diabetes Prediction from Whole Metagenome Shotgun of Human Infant Gut
 
 ## Background
 
