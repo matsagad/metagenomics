@@ -12,6 +12,8 @@ Whole genome shotgun (WGS) sequences from the study carried out by [Kostic et al
 
 As the data was fairly imbalanced (only about a quarter resulted in T1D), the Synthetic Minority Oversampling technique (SMOTE) was employed. LASSO was further used to narrow down statistically relevant features. Out of 512 features, 19 were considered. Classification models used parallel that of the IBM paper, namely: Relevance Vector Machines (RVM), Support Vector Machines (SVM), Random Forests (RF), and Naive Bayes (NB). Similarly, for their performance metrics, each is trained with 80% of the data and tested on the remaining 20%. Ten-fold cross-validation (CV) was performed to quantify oversampling issues (which is particular for SMOTE-applied datasets). Training and testing took about 2.5 minutes in total.
 
+The Jupyter notebook can be found in [`/src/main.ipynb`](https://github.com/matsagad/metagenomics/blob/main/phenotype_prediction/src/main.ipynb).
+
 ## Results
 
 The performance of the models was quantified through their F1 scores throughout training, testing, and CV. They are given as follows:
